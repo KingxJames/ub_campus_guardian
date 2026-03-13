@@ -1,33 +1,53 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { useTheme } from "../../components/ThemeProvider/ThemeProvider";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
+  const { colors } = useTheme();
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: "#670086", // blue accent
+        tabBarInactiveTintColor: "#888", // greyed out inactive
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          borderTopColor: "#eee",
+          height: 60,
+          paddingBottom: 5,
+        },
+        headerStyle: {
+          backgroundColor: "#fdfdfd",
+        },
+        headerTitleAlign: "center",
+        headerTitleStyle: {
+          fontWeight: "bold",
+          fontSize: 18,
+          color: "#24262c",
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Emergency",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="alert-circle-outline"
+              size={size || 26}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="anonymousReport"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Anonymous",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size || 26} color={color} />
+          ),
         }}
       />
     </Tabs>
