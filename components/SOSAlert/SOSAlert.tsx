@@ -1,11 +1,12 @@
 import {
-    selectEmergency,
-    setAccuracy,
-    setEmergency,
-    setEmergencyFormSubmitted,
-    setEmergencyTimestamp,
-    setLatitude,
-    setLongitude,
+  selectEmergency,
+  setAccuracy,
+  setEmergencyFormSubmitted,
+  setEmergencyId,
+  setEmergencyReportStatus,
+  setEmergencyTimestamp,
+  setLatitude,
+  setLongitude
 } from "@/store/features/emergencySlice";
 import { useCreateEmergencyMutation } from "@/store/services/emergencyAPI";
 import * as Location from "expo-location";
@@ -49,16 +50,18 @@ export default function SOSAlert({
       const { latitude, longitude, accuracy } = location.coords;
 
       // Generate timestamp and unique ID
-      const timestamp = new Date().toISOString();
+      const timestamp = new Date().toTimeString().split(" ")[0]; // HH:MM:SS
       const id = uuidv4();
 
       // Save in Redux
+      dispatch(setEmergencyId(id));
       dispatch(setLatitude(latitude));
       dispatch(setLongitude(longitude));
       dispatch(setAccuracy(accuracy));
-      dispatch(setEmergencyTimestamp(timestamp));
+      dispatch(setEmergencyTimestamp(timestamp)); // if using timestamp field
       dispatch(setEmergencyFormSubmitted(true));
-      dispatch(setEmergency({ ...emergency, id }));
+      dispatch(setEmergencyReportStatus("Active")); // if using status field
+      // dispatch(setEmergency({ ...emergency, id })); // ❌ remove this line
 
       // Send to backend
       await createEmergency({
@@ -67,6 +70,7 @@ export default function SOSAlert({
         longitude,
         accuracy,
         timestamp,
+        emergencyReportStatus: "Active", // if using status field
         isRead: false,
         formSubmitted: true,
       }).unwrap();
