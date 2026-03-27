@@ -8,8 +8,8 @@ interface EmergencyCallButtonProps {
 }
 
 export default function EmergencyCallButton({
-  phoneNumber = "911",
-  label = "🚨 Call 911",
+  phoneNumber = "999",
+  label = "🚨 Call 999 (UB Public Safety Hotline)",
 }: EmergencyCallButtonProps) {
   const { colors } = useTheme();
   const callEmergency = () => {

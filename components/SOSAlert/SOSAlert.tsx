@@ -6,7 +6,7 @@ import {
   setEmergencyReportStatus,
   setEmergencyTimestamp,
   setLatitude,
-  setLongitude
+  setLongitude,
 } from "@/store/features/emergencySlice";
 import { useCreateEmergencyMutation } from "@/store/services/emergencyAPI";
 import * as Location from "expo-location";
@@ -50,7 +50,7 @@ export default function SOSAlert({
       const { latitude, longitude, accuracy } = location.coords;
 
       // Generate timestamp and unique ID
-      const timestamp = new Date().toTimeString().split(" ")[0]; // HH:MM:SS
+      const timestamp = new Date().toISOString(); // HH:MM:SS
       const id = uuidv4();
 
       // Save in Redux
