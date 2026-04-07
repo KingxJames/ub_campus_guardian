@@ -1,7 +1,4 @@
-import {
-  useCreateAnonymousReportMutation,
-  useInitializeAnonymousReportMutation,
-} from "@/store/services/anonymousAPI";
+import { useCreateAnonymousReportMutation } from "@/store/services/anonymousAPI";
 import { useNavigation } from "expo-router";
 import React from "react";
 import {
@@ -22,7 +19,6 @@ import {
   selectAnonymousReportCategory,
   setAnonymousReport,
   setCategory,
-  setFormSubmitted,
   setLocation,
   setReports,
 } from "../../store/features/anonymousReportSlice";
@@ -44,25 +40,14 @@ export default function AnonymousReport() {
   const dispatch = useDispatch();
   const anonymousReport = useSelector(selectAnonymousReport);
   const selectedCategory = useSelector(selectAnonymousReportCategory);
+
   const [errors, setErrors] = React.useState<{ [key: string]: boolean }>({});
+  const [submittedId, setSubmittedId] = React.useState<string | null>(null);
+  const [submittedCaseNumber, setSubmittedCaseNumber] = React.useState<
+    string | null
+  >(null);
 
-  const [initializeAnonymousReport] = useInitializeAnonymousReportMutation();
   const [createAnonymousReport] = useCreateAnonymousReportMutation();
-
-  // Automatically initialize anonymous report with ID on page load
-  React.useEffect(() => {
-    if (!anonymousReport.id) {
-      const initReport = async () => {
-        try {
-          const result = await initializeAnonymousReport({}).unwrap();
-          dispatch(setAnonymousReport(result));
-        } catch (err) {
-          console.error("Failed to initialize anonymous report:", err);
-        }
-      };
-      initReport();
-    }
-  }, []);
 
   const handleBackButton = () => navigation.goBack();
 
@@ -93,15 +78,21 @@ export default function AnonymousReport() {
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
+
     try {
-      await createAnonymousReport({
-        ...anonymousReport,
+      const result = await createAnonymousReport({
+        category: anonymousReport.category,
+        location: anonymousReport.location,
+        reports: anonymousReport.reports,
         formSubmitted: true,
       }).unwrap();
 
-      dispatch(setFormSubmitted(true));
+      setSubmittedId(result.data.id);
+      setSubmittedCaseNumber(result.data.caseNumber);
 
-      // Reset form to initial state
+      alert(`Report submitted successfully!\nID: ${result.data.id}`);
+
+      // Reset form
       dispatch(setAnonymousReport(initialState));
     } catch (err) {
       console.error("Failed to submit anonymous report:", err);
@@ -145,7 +136,8 @@ export default function AnonymousReport() {
             <Text style={{ fontSize: 13, color: colors.text + "99" }}>
               Your identity is fully protected
             </Text>
-            {anonymousReport.id && (
+
+            {submittedId && (
               <Text
                 style={{
                   fontSize: 12,
@@ -153,7 +145,18 @@ export default function AnonymousReport() {
                   marginTop: 4,
                 }}
               >
-                Report ID: {anonymousReport.id}
+                Last Report ID: {submittedId}
+              </Text>
+            )}
+            {submittedCaseNumber && (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.text + "66",
+                  marginTop: 4,
+                }}
+              >
+                Case Number: {submittedCaseNumber}
               </Text>
             )}
           </View>
@@ -267,11 +270,7 @@ export default function AnonymousReport() {
       </ScrollView>
 
       {/* Warning Message */}
-      <View
-        style={{
-          paddingHorizontal: 20,
-        }}
-      >
+      <View style={{ paddingHorizontal: 20 }}>
         <View
           style={{
             marginTop: 20,
@@ -289,15 +288,8 @@ export default function AnonymousReport() {
         </View>
       </View>
 
-      {/* Bottom Submit Button */}
-      <View
-        style={{
-          padding: 20,
-          // borderTopWidth: 1,
-          borderTopColor: colors.text + "22",
-          backgroundColor: colors.background,
-        }}
-      >
+      {/* Submit Button */}
+      <View style={{ padding: 20, backgroundColor: colors.background }}>
         <Pressable
           onPress={handleSubmit}
           style={{
