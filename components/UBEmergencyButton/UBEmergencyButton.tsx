@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Pressable, Text, View } from "react-native";
 import SOSAlert from "../SOSAlert/SOSAlert";
 import SOSSent from "../SOSSent/SOSSent";
@@ -76,85 +76,93 @@ export default function UBEmergencyButton() {
       {/* Animated Pulse + SOS Button */}
       {!showSOSSent && (
         <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Animated.View
-            style={{
-              position: "absolute",
-              width: 220,
-              height: 220,
-              borderRadius: 110,
-              backgroundColor: "#e53935",
-              opacity,
-              transform: [{ scale }],
-            }}
-          />
-
           <Text
             style={{
-              fontSize: 24,
+              fontSize: 26,
               color: colors.text,
-              fontWeight: "600",
-              marginBottom: 15,
+              fontWeight: "800",
+              marginBottom: 10,
               textAlign: "center",
             }}
           >
             Press For Emergency
           </Text>
 
-          <Pressable
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.text + "99",
+              textAlign: "center",
+              lineHeight: 20,
+              maxWidth: 280,
+              marginBottom: 30,
+            }}
+          >
+            Immediately alerts campus security and shares your live location
+            for faster assistance.
+          </Text>
+
+          {/* Pulse ring and button share this box so they stay perfectly concentric */}
+          <View
             style={{
               width: 220,
               height: 220,
-              borderRadius: 110,
-              backgroundColor: "#e53935",
               justifyContent: "center",
               alignItems: "center",
-              shadowColor: "#000",
-              shadowOpacity: 0.25,
-              shadowRadius: 12,
-              shadowOffset: { width: 0, height: 5 },
-              elevation: 10,
             }}
-            onPress={handleSOSAlert}
           >
-            <Text
+            <Animated.View
+              pointerEvents="none"
               style={{
-                color: "white",
-                fontWeight: "bold",
-                fontSize: 60,
-                letterSpacing: 3,
+                position: "absolute",
+                width: 220,
+                height: 220,
+                borderRadius: 110,
+                backgroundColor: "#e53935",
+                opacity,
+                transform: [{ scale }],
               }}
-            >
-              SOS
-            </Text>
-            <Text
-              style={{
-                color: "white",
-                fontSize: 14,
-                marginTop: 6,
-                letterSpacing: 1,
-              }}
-            >
-              PRESS TO ALERT
-            </Text>
-          </Pressable>
-        </View>
-      )}
+            />
 
-      {/* Description */}
-      {!showSOSSent && (
-        <Text
-          style={{
-            fontSize: 16,
-            marginTop: 30,
-            textAlign: "center",
-            color: colors.text,
-            lineHeight: 24,
-            maxWidth: 280,
-          }}
-        >
-          Immediately alerts campus security and shares your live location for
-          faster assistance.
-        </Text>
+            <Pressable
+              style={{
+                width: 220,
+                height: 220,
+                borderRadius: 110,
+                backgroundColor: "#e53935",
+                justifyContent: "center",
+                alignItems: "center",
+                shadowColor: "#000",
+                shadowOpacity: 0.25,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 5 },
+                elevation: 10,
+              }}
+              onPress={handleSOSAlert}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: 60,
+                  letterSpacing: 3,
+                }}
+              >
+                SOS
+              </Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 14,
+                  marginTop: 6,
+                  letterSpacing: 1,
+                }}
+              >
+                PRESS TO ALERT
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       )}
 
       {/* SOS Alert Modal */}

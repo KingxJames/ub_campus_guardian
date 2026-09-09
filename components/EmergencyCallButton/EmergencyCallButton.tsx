@@ -1,4 +1,4 @@
-import React from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { Alert, Linking, Pressable, Text } from "react-native";
 import { useTheme } from "../ThemeProvider/ThemeProvider";
 
@@ -9,7 +9,7 @@ interface EmergencyCallButtonProps {
 
 export default function EmergencyCallButton({
   phoneNumber = "999",
-  label = "🚨 Call 999 (UB Public Safety Hotline)",
+  label = "Call 999 (UB Public Safety Hotline)",
 }: EmergencyCallButtonProps) {
   const { colors } = useTheme();
   const callEmergency = () => {
@@ -30,18 +30,33 @@ export default function EmergencyCallButton({
   return (
     <Pressable
       onPress={callEmergency}
-      style={{
-        backgroundColor: colors.card,
-        paddingVertical: 16,
-        borderRadius: 12,
+      style={({ pressed }) => ({
+        flexDirection: "row",
         alignItems: "center",
-        marginTop: 20,
+        justifyContent: "center",
+        backgroundColor: colors.card,
+        borderWidth: 1,
+        borderColor: colors.text + "22",
+        paddingVertical: 16,
+        paddingHorizontal: 18,
+        borderRadius: 30,
+        marginTop: 12,
         marginBottom: 20,
         marginLeft: 20,
         marginRight: 20,
-      }}
+        opacity: pressed ? 0.7 : 1,
+      })}
     >
-      <Text style={{ color: colors.text, fontSize: 16, fontWeight: "700" }}>
+      <Ionicons name="call" size={18} color="#e53935" />
+      <Text
+        style={{
+          color: colors.text,
+          fontSize: 15,
+          fontWeight: "700",
+          marginLeft: 10,
+          textAlign: "center",
+        }}
+      >
         {label}
       </Text>
     </Pressable>

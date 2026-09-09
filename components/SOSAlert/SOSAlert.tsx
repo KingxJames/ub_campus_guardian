@@ -9,11 +9,11 @@ import {
   setLongitude,
 } from "@/store/features/emergencySlice";
 import { useCreateEmergencyMutation } from "@/store/services/emergencyAPI";
+import * as Crypto from "expo-crypto";
 import * as Location from "expo-location";
 import React from "react";
 import { Image, Modal, Pressable, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
 import { useTheme } from "../ThemeProvider/ThemeProvider";
 
 const PlaceholderImage = require("../../assets/images/publicSafetyLogo White Transparent background.png");
@@ -51,7 +51,7 @@ export default function SOSAlert({
 
       // Generate timestamp and unique ID
       const timestamp = new Date().toISOString(); // HH:MM:SS
-      const id = uuidv4();
+      const id = Crypto.randomUUID();
 
       // Save in Redux
       dispatch(setEmergencyId(id));

@@ -1,6 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
-import storage from "redux-persist/lib/storage";
 import anonymousReportReducer from "./features/anonymousReportSlice";
 import buildingReducer from "./features/buildingSlice";
 import emergencyReducer from "./features/emergencySlice";
@@ -8,13 +8,13 @@ import { baseAPI } from "./services/baseAPI";
 
 const anonymousReportPersistConfig = {
   key: "anonymousReport",
-  storage,
+  storage: AsyncStorage,
   whitelist: ["category", "reports", "location", "formSubmitted"],
 };
 
 const emergencyPersistConfig = {
   key: "emergency",
-  storage,
+  storage: AsyncStorage,
   whitelist: [
     "longitude",
     "latitude",

@@ -7,16 +7,16 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#670086", // blue accent
+        tabBarActiveTintColor: "#ff3254", // blue accent
         tabBarInactiveTintColor: "#888", // greyed out inactive
         tabBarStyle: {
-          backgroundColor: "#fff",
-          borderTopColor: "#eee",
+          backgroundColor: colors.background,
+          borderTopColor: colors.text + "22",
           height: 60,
           paddingBottom: 5,
         },
         headerStyle: {
-          backgroundColor: "#fdfdfd",
+          backgroundColor: colors.background,
         },
         headerTitleAlign: "center",
         headerTitleStyle: {

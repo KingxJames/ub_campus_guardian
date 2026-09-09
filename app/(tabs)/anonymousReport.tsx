@@ -1,7 +1,9 @@
 import { useCreateAnonymousReportMutation } from "@/store/services/anonymousAPI";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +13,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "../../components/ThemeProvider/ThemeProvider";
 import {
@@ -36,6 +39,7 @@ const categories = [
 
 export default function AnonymousReport() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const anonymousReport = useSelector(selectAnonymousReport);
@@ -47,7 +51,8 @@ export default function AnonymousReport() {
     string | null
   >(null);
 
-  const [createAnonymousReport] = useCreateAnonymousReportMutation();
+  const [createAnonymousReport, { isLoading: isSubmitting }] =
+    useCreateAnonymousReportMutation();
 
   const handleBackButton = () => navigation.goBack();
 
@@ -77,6 +82,7 @@ export default function AnonymousReport() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
     if (!validateForm()) return;
 
     try {
@@ -106,7 +112,11 @@ export default function AnonymousReport() {
     >
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, paddingBottom: 20 }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingTop: insets.top + 20,
+          paddingBottom: 20,
+        }}
       >
         {/* Header */}
         <View
@@ -116,13 +126,25 @@ export default function AnonymousReport() {
             marginBottom: 25,
           }}
         >
-          <Pressable onPress={handleBackButton} hitSlop={10}>
+          <Pressable
+            onPress={handleBackButton}
+            hitSlop={10}
+            style={({ pressed }) => ({
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: colors.card,
+              justifyContent: "center",
+              alignItems: "center",
+              marginRight: 14,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
             <Image
               source={PlaceholderImage}
               style={{
-                width: 24,
-                height: 24,
-                marginRight: 12,
+                width: 18,
+                height: 18,
                 tintColor: colors.text,
               }}
             />
@@ -163,16 +185,23 @@ export default function AnonymousReport() {
         </View>
 
         {/* Category Section */}
-        <Text
+        <View
           style={{
-            fontSize: 18,
-            fontWeight: "600",
-            color: colors.text,
+            flexDirection: "row",
+            alignItems: "center",
             marginBottom: 12,
           }}
         >
-          Category
-        </Text>
+          <Ionicons
+            name="pricetag-outline"
+            size={16}
+            color={colors.text}
+            style={{ marginRight: 8 }}
+          />
+          <Text style={{ fontSize: 18, fontWeight: "600", color: colors.text }}>
+            Category
+          </Text>
+        </View>
         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
           {categories.map((category) => {
             const isSelected = selectedCategory === category;
@@ -186,11 +215,15 @@ export default function AnonymousReport() {
                   backgroundColor: isSelected
                     ? "#e53935"
                     : pressed
-                      ? "#eaeaea"
+                      ? colors.text + "11"
                       : colors.card,
                   borderRadius: 20,
                   borderWidth: 1,
-                  borderColor: isSelected ? "#e53935" : "#ddd",
+                  borderColor: isSelected
+                    ? "#e53935"
+                    : errors.category
+                      ? "#e5393588"
+                      : colors.text + "22",
                   marginRight: 10,
                   marginBottom: 10,
                 })}
@@ -207,22 +240,34 @@ export default function AnonymousReport() {
             );
           })}
         </View>
+        {errors.category && (
+          <Text style={{ color: "#e53935", fontSize: 12, marginTop: -4, marginBottom: 8 }}>
+            Please select a category
+          </Text>
+        )}
 
         {/* Location Section */}
         <View style={{ marginTop: 25 }}>
-          <Text
+          <View
             style={{
-              fontSize: 18,
-              fontWeight: "600",
-              color: colors.text,
+              flexDirection: "row",
+              alignItems: "center",
               marginBottom: 8,
             }}
           >
-            Location
-          </Text>
+            <Ionicons
+              name="location-outline"
+              size={16}
+              color={colors.text}
+              style={{ marginRight: 8 }}
+            />
+            <Text style={{ fontSize: 18, fontWeight: "600", color: colors.text }}>
+              Location
+            </Text>
+          </View>
           <TextInput
             style={{
-              borderColor: colors.text + "22",
+              borderColor: errors.location ? "#e5393588" : colors.text + "22",
               borderWidth: 1,
               padding: 14,
               borderRadius: 12,
@@ -238,22 +283,29 @@ export default function AnonymousReport() {
 
         {/* Report Details Section */}
         <View style={{ marginTop: 25 }}>
-          <Text
+          <View
             style={{
-              fontSize: 18,
-              fontWeight: "600",
-              color: colors.text,
+              flexDirection: "row",
+              alignItems: "center",
               marginBottom: 8,
             }}
           >
-            Report Details
-          </Text>
+            <Ionicons
+              name="document-text-outline"
+              size={16}
+              color={colors.text}
+              style={{ marginRight: 8 }}
+            />
+            <Text style={{ fontSize: 18, fontWeight: "600", color: colors.text }}>
+              Report Details
+            </Text>
+          </View>
           <TextInput
             multiline
             numberOfLines={6}
             textAlignVertical="top"
             style={{
-              borderColor: colors.text + "22",
+              borderColor: errors.reports ? "#e5393588" : colors.text + "22",
               borderWidth: 1,
               padding: 14,
               borderRadius: 12,
@@ -275,33 +327,71 @@ export default function AnonymousReport() {
           style={{
             marginTop: 20,
             padding: 15,
-            backgroundColor: "#fff3cd",
+            flexDirection: "row",
+            backgroundColor: "#f5a62322",
             borderLeftWidth: 4,
-            borderLeftColor: "#ffeeba",
+            borderLeftColor: "#f5a623",
             borderRadius: 8,
           }}
         >
-          <Text style={{ color: "#856404", fontSize: 14, lineHeight: 20 }}>
-            ⚠️ Please take this seriously. This report is not a joke and can
+          <Ionicons
+            name="warning"
+            size={18}
+            color="#f5a623"
+            style={{ marginRight: 10, marginTop: 2 }}
+          />
+          <Text
+            style={{
+              color: colors.text,
+              fontSize: 14,
+              lineHeight: 20,
+              flex: 1,
+            }}
+          >
+            Please take this seriously. This report is not a joke and can
             impact someone's life. Provide accurate and truthful information.
           </Text>
         </View>
       </View>
 
       {/* Submit Button */}
-      <View style={{ padding: 20, backgroundColor: colors.background }}>
+      <View
+        style={{
+          padding: 20,
+          paddingBottom: insets.bottom + 20,
+          backgroundColor: colors.background,
+        }}
+      >
         <Pressable
           onPress={handleSubmit}
+          disabled={isSubmitting}
           style={{
+            flexDirection: "row",
             backgroundColor: "#e53935",
             paddingVertical: 16,
-            borderRadius: 12,
+            borderRadius: 22,
+            justifyContent: "center",
             alignItems: "center",
+            opacity: isSubmitting ? 0.7 : 1,
           }}
         >
-          <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
-            Submit Report
-          </Text>
+          {isSubmitting ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <>
+              <Ionicons
+                name="paper-plane-outline"
+                size={18}
+                color="white"
+                style={{ marginRight: 8 }}
+              />
+              <Text
+                style={{ color: "white", fontSize: 16, fontWeight: "600" }}
+              >
+                Submit Anonymous Report
+              </Text>
+            </>
+          )}
         </Pressable>
       </View>
     </KeyboardAvoidingView>

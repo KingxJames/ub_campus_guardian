@@ -1,7 +1,7 @@
 import UBEmergencyCallButton from "@/components/EmergencyCallButton/EmergencyCallButton";
 import UBEmergencyButton from "@/components/UBEmergencyButton/UBEmergencyButton";
-import React from "react";
 import { Image, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../components/ThemeProvider/ThemeProvider";
 import ThemeToggle from "../../components/ThemeToggle/ThemeToggle";
 
@@ -9,6 +9,7 @@ const PlaceholderImage = require("../../assets/images/publicSafetyLogo White Tra
 
 export default function Index() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <View
@@ -23,12 +24,12 @@ export default function Index() {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          paddingTop: 20,
+          paddingTop: insets.top + 12,
           paddingBottom: 20,
           paddingHorizontal: 20,
           // borderBottomWidth: 1,
           // borderBottomColor: colors.background === "#121212" ? "#333" : "#ddd", // theme-aware border
-          backgroundColor: colors.card, // theme-aware header background
+          backgroundColor: colors.background, // match body background for a seamless header
         }}
       >
         {/* Logo + Text */}
@@ -46,10 +47,10 @@ export default function Index() {
             <Text
               style={{ fontSize: 15, fontWeight: "bold", color: colors.text }}
             >
-              CampusSafe
+              Campus Safety
             </Text>
             <Text style={{ fontSize: 10, color: colors.text }}>
-              Student Safety App
+              Public Safety App
             </Text>
           </View>
         </View>
