@@ -34,6 +34,10 @@ export const anonymousReportSlice = createSlice({
       state = action.payload;
       return state;
     },
+    setId: (state, action: PayloadAction<string>) => {
+      state.id = action.payload;
+      return state;
+    },
     setCaseNumber: (state, action: PayloadAction<string>) => {
       state.caseNumber = action.payload;
       return state;
@@ -67,6 +71,7 @@ export const anonymousReportSlice = createSlice({
 
 export const {
   setAnonymousReport,
+  setId,
   setCaseNumber,
   setCategory,
   setReports,

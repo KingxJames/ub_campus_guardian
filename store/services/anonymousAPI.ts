@@ -1,13 +1,22 @@
 import { AnonymousReportState } from "../features/anonymousReportSlice";
 import { baseAPI } from "./baseAPI";
 
+export interface AnonymousReportResponse {
+  success: boolean;
+  message: string;
+  data: AnonymousReportState | null;
+}
+
 export const anonymousReportSlice = baseAPI.injectEndpoints({
   endpoints: (builder) => ({
-    initializeAnonymousReport: builder.mutation({
-      query: (body: Partial<AnonymousReportState>) => ({
+    initializeAnonymousReport: builder.mutation<
+      AnonymousReportState,
+      Partial<AnonymousReportState> | void
+    >({
+      query: (body) => ({
         url: "public/initialize/anonymousReports",
         method: "POST",
-        body,
+        body: body ?? {},
       }),
       invalidatesTags: ["AnonymousReport"],
     }),
@@ -18,8 +27,11 @@ export const anonymousReportSlice = baseAPI.injectEndpoints({
       }),
       providesTags: ["AnonymousReport"],
     }),
-    createAnonymousReport: builder.mutation({
-      query: (body: Partial<AnonymousReportState>) => ({
+    createAnonymousReport: builder.mutation<
+      AnonymousReportResponse,
+      Partial<AnonymousReportState>
+    >({
+      query: (body) => ({
         url: "public/anonymousReports",
         method: "POST",
         body,

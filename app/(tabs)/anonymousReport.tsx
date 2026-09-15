@@ -1,4 +1,7 @@
-import { useCreateAnonymousReportMutation } from "@/store/services/anonymousAPI";
+import {
+  useCreateAnonymousReportMutation,
+  useInitializeAnonymousReportMutation,
+} from "@/store/services/anonymousAPI";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import React from "react";
@@ -21,7 +24,9 @@ import {
   selectAnonymousReport,
   selectAnonymousReportCategory,
   setAnonymousReport,
+  setCaseNumber,
   setCategory,
+  setId,
   setLocation,
   setReports,
 } from "../../store/features/anonymousReportSlice";
@@ -44,7 +49,6 @@ export default function AnonymousReport() {
   const dispatch = useDispatch();
   const anonymousReport = useSelector(selectAnonymousReport);
   const selectedCategory = useSelector(selectAnonymousReportCategory);
-
   const [errors, setErrors] = React.useState<{ [key: string]: boolean }>({});
   const [submittedId, setSubmittedId] = React.useState<string | null>(null);
   const [submittedCaseNumber, setSubmittedCaseNumber] = React.useState<
@@ -53,6 +57,21 @@ export default function AnonymousReport() {
 
   const [createAnonymousReport, { isLoading: isSubmitting }] =
     useCreateAnonymousReportMutation();
+  const [initializeAnonymousReport] = useInitializeAnonymousReportMutation();
+
+  React.useEffect(() => {
+    if (anonymousReport.caseNumber) return;
+    initializeAnonymousReport()
+      .unwrap()
+      .then((result) => {
+        if (result?.id) dispatch(setId(result.id));
+        if (result?.caseNumber) dispatch(setCaseNumber(result.caseNumber));
+      })
+      .catch((err) => {
+        console.error("Failed to initialize anonymous report:", err);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleBackButton = () => navigation.goBack();
 
@@ -86,12 +105,26 @@ export default function AnonymousReport() {
     if (!validateForm()) return;
 
     try {
+      let caseNumber = anonymousReport.caseNumber;
+
+      if (!caseNumber) {
+        const initResult = await initializeAnonymousReport().unwrap();
+        caseNumber = initResult.caseNumber;
+        if (initResult.id) dispatch(setId(initResult.id));
+        dispatch(setCaseNumber(caseNumber));
+      }
+
       const result = await createAnonymousReport({
+        caseNumber,
         category: anonymousReport.category,
         location: anonymousReport.location,
         reports: anonymousReport.reports,
         formSubmitted: true,
       }).unwrap();
+
+      if (!result.data) {
+        throw new Error(result.message || "Failed to submit anonymous report");
+      }
 
       setSubmittedId(result.data.id);
       setSubmittedCaseNumber(result.data.caseNumber);
@@ -102,6 +135,7 @@ export default function AnonymousReport() {
       dispatch(setAnonymousReport(initialState));
     } catch (err) {
       console.error("Failed to submit anonymous report:", err);
+      alert("Failed to submit report. Please try again.");
     }
   };
 
@@ -241,7 +275,14 @@ export default function AnonymousReport() {
           })}
         </View>
         {errors.category && (
-          <Text style={{ color: "#e53935", fontSize: 12, marginTop: -4, marginBottom: 8 }}>
+          <Text
+            style={{
+              color: "#e53935",
+              fontSize: 12,
+              marginTop: -4,
+              marginBottom: 8,
+            }}
+          >
             Please select a category
           </Text>
         )}
@@ -261,7 +302,9 @@ export default function AnonymousReport() {
               color={colors.text}
               style={{ marginRight: 8 }}
             />
-            <Text style={{ fontSize: 18, fontWeight: "600", color: colors.text }}>
+            <Text
+              style={{ fontSize: 18, fontWeight: "600", color: colors.text }}
+            >
               Location
             </Text>
           </View>
@@ -296,7 +339,9 @@ export default function AnonymousReport() {
               color={colors.text}
               style={{ marginRight: 8 }}
             />
-            <Text style={{ fontSize: 18, fontWeight: "600", color: colors.text }}>
+            <Text
+              style={{ fontSize: 18, fontWeight: "600", color: colors.text }}
+            >
               Report Details
             </Text>
           </View>
@@ -348,8 +393,8 @@ export default function AnonymousReport() {
               flex: 1,
             }}
           >
-            Please take this seriously. This report is not a joke and can
-            impact someone's life. Provide accurate and truthful information.
+            Please take this seriously. This report is not a joke and can impact
+            someone's life. Provide accurate and truthful information.
           </Text>
         </View>
       </View>
@@ -385,9 +430,7 @@ export default function AnonymousReport() {
                 color="white"
                 style={{ marginRight: 8 }}
               />
-              <Text
-                style={{ color: "white", fontSize: 16, fontWeight: "600" }}
-              >
+              <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
                 Submit Anonymous Report
               </Text>
             </>
