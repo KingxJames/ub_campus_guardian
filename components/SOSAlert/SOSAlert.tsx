@@ -11,8 +11,15 @@ import {
 import { useCreateEmergencyMutation } from "@/store/services/emergencyAPI";
 import * as Crypto from "expo-crypto";
 import * as Location from "expo-location";
-import React from "react";
-import { Image, Modal, Pressable, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "../ThemeProvider/ThemeProvider";
 
@@ -33,8 +40,30 @@ export default function SOSAlert({
   const dispatch = useDispatch();
   const emergency = useSelector(selectEmergency);
   const [createEmergency] = useCreateEmergencyMutation();
+  const [isSending, setIsSending] = useState(false);
+
+  // High-accuracy GPS fixes can take a long time (or never resolve) indoors.
+  // Race it against a timeout and fall back to the last known location.
+  const getLocationWithTimeout = async (timeoutMs = 8000) => {
+    try {
+      return await Promise.race([
+        Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("location-timeout")), timeoutMs)
+        ),
+      ]);
+    } catch {
+      const lastKnown = await Location.getLastKnownPositionAsync();
+      if (lastKnown) return lastKnown;
+      throw new Error("Unable to get your location.");
+    }
+  };
 
   const handleConfirm = async () => {
+    if (isSending) return;
+    setIsSending(true);
     try {
       // Request location permission
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -44,9 +73,7 @@ export default function SOSAlert({
       }
 
       // Get current location
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
+      const location = await getLocationWithTimeout();
       const { latitude, longitude, accuracy } = location.coords;
 
       // Generate timestamp and unique ID
@@ -80,6 +107,8 @@ export default function SOSAlert({
     } catch (error) {
       console.error("Failed to create emergency:", error);
       alert("Failed to send SOS. Please try again.");
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -144,6 +173,7 @@ export default function SOSAlert({
           <View style={{ flexDirection: "row", width: "100%" }}>
             <Pressable
               onPress={onCancel}
+              disabled={isSending}
               style={{
                 flex: 1,
                 paddingVertical: 14,
@@ -152,6 +182,7 @@ export default function SOSAlert({
                 borderWidth: 1,
                 borderColor: "#ccc",
                 alignItems: "center",
+                opacity: isSending ? 0.5 : 1,
               }}
             >
               <Text style={{ color: colors.text, fontWeight: "600" }}>
@@ -161,6 +192,7 @@ export default function SOSAlert({
 
             <Pressable
               onPress={handleConfirm}
+              disabled={isSending}
               style={{
                 flex: 1,
                 paddingVertical: 14,
@@ -168,10 +200,20 @@ export default function SOSAlert({
                 borderRadius: 12,
                 backgroundColor: "#e53935",
                 alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                opacity: isSending ? 0.7 : 1,
               }}
             >
+              {isSending && (
+                <ActivityIndicator
+                  size="small"
+                  color="white"
+                  style={{ marginRight: 8 }}
+                />
+              )}
               <Text style={{ color: "white", fontWeight: "700" }}>
-                Confirm SOS
+                {isSending ? "Sending..." : "Confirm SOS"}
               </Text>
             </Pressable>
           </View>

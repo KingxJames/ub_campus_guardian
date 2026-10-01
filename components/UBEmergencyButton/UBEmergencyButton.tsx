@@ -53,15 +53,10 @@ export default function UBEmergencyButton() {
   const handleConfirm = () => {
     setShowSOSAlert(false); // close alert
     setShowSOSSent(true); // show "SOS Sent" component
-
-    // Show SOS Sent for 2 seconds
-    setTimeout(() => {
-      setShowSOSSent(false); // hide it
-    }, 5000);
-
-    // 🚨 Trigger your emergency API here
-    console.log("SOS Confirmed, send to backend...");
   };
+
+  // Dismiss "SOS Sent" and return to the SOS button
+  const handleCloseSent = () => setShowSOSSent(false);
 
   return (
     <View
@@ -175,7 +170,7 @@ export default function UBEmergencyButton() {
       )}
 
       {/* SOS Sent Screen */}
-      {showSOSSent && <SOSSent />}
+      {showSOSSent && <SOSSent onClose={handleCloseSent} />}
     </View>
   );
 }

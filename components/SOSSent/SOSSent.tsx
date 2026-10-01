@@ -4,7 +4,11 @@ import { useTheme } from "../ThemeProvider/ThemeProvider";
 
 const PlaceholderImage = require("../../assets/images/publicSafetyLogo White Transparent background.png");
 
-export default function SOSSent() {
+interface SOSSentProps {
+  onClose: () => void;
+}
+
+export default function SOSSent({ onClose }: SOSSentProps) {
   const { colors } = useTheme();
 
   return (
@@ -69,7 +73,7 @@ export default function SOSSent() {
           }}
         >
           <Pressable
-            onPress={() => console.log("Pressed")}
+            onPress={onClose}
             style={{
               flex: 1,
               paddingVertical: 14,
